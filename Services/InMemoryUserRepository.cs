@@ -30,13 +30,18 @@ public class InMemoryUserRepository : IUserRepository
 
     public bool UpdateUser(int id, User user)
     {
-        if (!_users.ContainsKey(id))
+        if (!_users.TryGetValue(id, out var existingUser))
         {
             return false;
         }
-        var timeUpdated = DateTime.UtcNow;
-        user = user with { UpdatedAt = timeUpdated };
-        _users[id] = user;
+        var updatedUser = user with { 
+            Id = id,
+            //For a persitent storage, we would not update CreatedAt and IsActive fields here
+            CreatedAt = existingUser.CreatedAt,
+            IsActive = existingUser.IsActive,
+            UpdatedAt = DateTime.UtcNow 
+            };
+        _users[id] = updatedUser;
         return true;
     }
 
